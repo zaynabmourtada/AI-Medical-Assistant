@@ -1,12 +1,12 @@
 'use client'
 
 import { Box, Button, Stack, TextField } from '@mui/material'
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 
 export default function Home() {
   const [messages, setMessages] = useState([
     {
-      role: 'medical assistant',
+      role: 'assistant',
       content: "Hello! I'm the Lumina AI medical assistant. How can I be of assistance?",
     },
   ])
@@ -37,7 +37,7 @@ export default function Home() {
         throw new Error('Network response was not okay.')
       }
 
-      const reader = res.body.getReader()
+      const reader = response.body.getReader()
       const decoder = new TextDecoder()
 
       while (true) {
@@ -50,7 +50,7 @@ export default function Home() {
           return [
             ...otherMessages,
             {
-              ...lastMesssage, content: lastMesssage.content + text
+              ...lastMessage, content: lastMessage.content + text
             },
           ]
         })
@@ -60,7 +60,7 @@ export default function Home() {
       console.error('Error:', error)
       setMessages((messages) => [
         ...messages,
-        { role: 'medical assistant', content: "I am sorry, but I encountered an error. Please try again." }
+        { role: 'assistant', content: "I am sorry, but I encountered an error. Please try again." }
       ])
     }
     setIsLoading(false)
@@ -73,6 +73,17 @@ export default function Home() {
       sendMessage()
     }
   }
+
+    const messagesEndRef = useRef(null)
+
+    const scrollToBottom = () => {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth"})
+    }
+
+    useEffect(() => {
+      scrollToBottom()
+    }, [messages])
+
 
   return (
     <Box
@@ -103,12 +114,12 @@ export default function Home() {
               key={index}
               display="flex"
               justifyContent={
-                message.role === 'medical assistant' ? 'flex-start' : 'flex-end'
+                message.role === 'assistant' ? 'flex-start' : 'flex-end'
               }
             >
               <Box
                 bgcolor={
-                  message.role === 'medical assistant'
+                  message.role === 'assistant'
                     ? 'primary.main'
                     : 'secondary.main'
                 }
@@ -120,6 +131,9 @@ export default function Home() {
               </Box>
             </Box>
           ))}
+          <div ref = {messagesEndRef} />
+
+
         </Stack>
         <Stack direction={'row'} spacing={2}>
           <TextField
