@@ -1,7 +1,22 @@
 'use client'
 
 import { Box, Button, Stack, TextField } from '@mui/material'
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, use } from 'react'
+import { styled } from '@mui/styles'
+
+
+const CustomTextField = styled(TextField)(({prefersColorScheme}) => ({
+  TextField: {
+    '& .MuiFilledInput-root': {
+      backgroundColor: prefersColorScheme === 'dark' ? '#333' : '#fff',
+      color: prefersColorScheme === 'dark' ? '#fff' : '#000',
+      border: prefersColorScheme === 'dark' ? '1px solid #fff' : '1px solid #000',
+    },
+    '& .MuiInputLabel-root': {
+      color: prefersColorScheme === 'dark' ? '#fff' : '#000',
+    },
+  },
+}))
 
 export default function Home() {
   const [messages, setMessages] = useState([
@@ -12,7 +27,12 @@ export default function Home() {
   ])
   const [message, setMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [prefersColorScheme, setPrefersColorScheme]=useState('light');
 
+  useEffect(() => {
+    const colorScheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    setPrefersColorScheme(colorScheme);
+  }, []);
   const sendMessage = async () => {
     if (!message.trim() || isLoading) return;
     setIsLoading(true)
@@ -98,7 +118,8 @@ export default function Home() {
         direction={'column'}
         width="500px"
         height="700px"
-        border="1px solid black"
+        border="1px solid darkgray"
+        border-radius="30px"
         p={2}
         spacing={3}
       >
@@ -136,13 +157,15 @@ export default function Home() {
 
         </Stack>
         <Stack direction={'row'} spacing={2}>
-          <TextField
+          <CustomTextField
             label="Message"
             fullWidth
+            variant='filled'
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyPress={handleKeyPress}
             disabled={isLoading}
+            prefersColorScheme={prefersColorScheme}
           />
           <Button variant="contained" onClick={sendMessage} disabled={isLoading}>
             {isLoading ? 'Sending...' : 'Send'}
