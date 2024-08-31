@@ -1,7 +1,7 @@
 'use client'
 
 import { Box, Button, Stack, TextField } from '@mui/material'
-import { useState, useRef, useEffect, use } from 'react'
+import { useState, useRef, useEffect} from 'react'
 import { styled } from '@mui/material/styles'
 
 
@@ -37,12 +37,13 @@ export default function Home() {
     if (!message.trim() || isLoading) return;
     setIsLoading(true)
 
-    setMessage('')
     setMessages((messages) => [
       ...messages,
       { role: 'user', content: message },
       { role: 'assistant', content: '' }
     ])
+
+    setMessage('')
 
     try {
       const response = await fetch('/api/chat', {
@@ -59,18 +60,19 @@ export default function Home() {
 
       const reader = response.body.getReader()
       const decoder = new TextDecoder()
+      let done = false
 
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
-        const text = decoder.decode(value, { stream: true })
+      while (!done) {
+        const { value, done: readerDone } = await reader.read()
+        done = readerDone
+        const chunkValue = decoder.decode(value, {stream: !done})
         setMessages((messages) => {
           let lastMessage = messages[messages.length - 1]
           let otherMessages = messages.slice(0, messages.length - 1)
           return [
             ...otherMessages,
             {
-              ...lastMessage, content: lastMessage.content + text
+              ...lastMessage, content: lastMessage.content + chunkValue
             },
           ]
         })
@@ -82,8 +84,9 @@ export default function Home() {
         ...messages,
         { role: 'assistant', content: "I am sorry, but I encountered an error. Please try again." }
       ])
-    }
+    }finally{
     setIsLoading(false)
+    }
   }
 
   // Allows user to send message by pressing enter
