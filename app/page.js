@@ -2,7 +2,7 @@
 
 import { Box, Button, Stack, TextField } from '@mui/material'
 import { useState, useRef, useEffect, use } from 'react'
-import { styled } from '@mui/styles'
+import { styled } from '@mui/material/styles'
 
 
 const CustomTextField = styled(TextField)(({prefersColorScheme}) => ({
